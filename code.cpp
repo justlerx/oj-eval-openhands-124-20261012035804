@@ -3,74 +3,13 @@
 #include <algorithm>
 using namespace std;
 
-class SegmentTree {
-private:
-    vector<int> tree;  // stores maximum value in each segment
-    vector<int> lazy;  // lazy propagation for range updates
-    int n;
-
-    void push(int v) {
-        if (lazy[v] != 0) {
-            tree[v*2] += lazy[v];
-            tree[v*2+1] += lazy[v];
-            lazy[v*2] += lazy[v];
-            lazy[v*2+1] += lazy[v];
-            lazy[v] = 0;
-        }
-    }
-
-    void update(int v, int tl, int tr, int l, int r, int addend) {
-        if (l > r) 
-            return;
-        if (l == tl && tr == r) {
-            tree[v] += addend;
-            lazy[v] += addend;
-        } else {
-            push(v);
-            int tm = (tl + tr) / 2;
-            update(v*2, tl, tm, l, min(r, tm), addend);
-            update(v*2+1, tm+1, tr, max(l, tm+1), r, addend);
-            tree[v] = max(tree[v*2], tree[v*2+1]);
-        }
-    }
-
-    int query(int v, int tl, int tr, int l, int r) {
-        if (l > r)
-            return 0;  // 0 is the minimum possible value
-        if (l <= tl && tr <= r)
-            return tree[v];
-        push(v);
-        int tm = (tl + tr) / 2;
-        return max(query(v*2, tl, tm, l, min(r, tm)), 
-                   query(v*2+1, tm+1, tr, max(l, tm+1), r));
-    }
-
-public:
-    SegmentTree(int size) {
-        n = size;
-        tree.resize(4 * n, 0);
-        lazy.resize(4 * n, 0);
-    }
-
-    void update_range(int l, int r, int addend) {
-        update(1, 0, n-1, l, r, addend);
-    }
-
-    int query_range(int l, int r) {
-        return query(1, 0, n-1, l, r);
-    }
-};
-
 int main() {
     int x, k, p;
     scanf("%d %d %d", &x, &k, &p);
     
-    SegmentTree* st = nullptr;
-    
-    // Create segment tree only if we have more than 1 station
-    if (x > 1) {
-        st = new SegmentTree(x-1);
-    }
+    // Create an array to track the number of seats booked on each segment
+    // segments[i] represents the number of seats booked on the segment from station i to i+1
+    vector<int> segments(x, 0);  // for x stations, we have x-1 segments, but we'll use x for simplicity
     
     for (int i = 0; i < p; i++) {
         int u, v, n;
@@ -88,17 +27,22 @@ int main() {
             continue;
         }
         
-        // At this point, we must have x > 1 and u < v
         u--; v--; // convert to 0-indexed
         
-        // Check the maximum number of seats already booked in the range [u, v-1]
-        int max_seats = st->query_range(u, v-1);
+        // Check if we have enough seats on all segments from u to v-1
+        int max_seats = 0;
+        for (int j = u; j < v; j++) {
+            if (segments[j] > max_seats) {
+                max_seats = segments[j];
+            }
+        }
         
         if (max_seats + n <= k) {
-            // Can fulfill the booking - after adding n seats, we won't exceed k on any segment
+            // Can fulfill the booking - update all segments from u to v-1
+            for (int j = u; j < v; j++) {
+                segments[j] += n;
+            }
             printf("T\n");
-            // Update the segment tree - add n to the range [u, v-1]
-            st->update_range(u, v-1, n);
         } else {
             printf("N\n");
         }
