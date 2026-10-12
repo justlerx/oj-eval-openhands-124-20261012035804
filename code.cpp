@@ -6,7 +6,7 @@ using namespace std;
 
 class SegmentTree {
 private:
-    vector<int> tree;  // stores minimum value in each segment
+    vector<int> tree;  // stores maximum value in each segment
     vector<int> lazy;  // lazy propagation for range updates
     int n;
 
@@ -31,18 +31,18 @@ private:
             int tm = (tl + tr) / 2;
             update(v*2, tl, tm, l, min(r, tm), addend);
             update(v*2+1, tm+1, tr, max(l, tm+1), r, addend);
-            tree[v] = min(tree[v*2], tree[v*2+1]);
+            tree[v] = max(tree[v*2], tree[v*2+1]);
         }
     }
 
     int query(int v, int tl, int tr, int l, int r) {
         if (l > r)
-            return INT_MAX;
+            return 0;  // 0 is the minimum possible value
         if (l <= tl && tr <= r)
             return tree[v];
         push(v);
         int tm = (tl + tr) / 2;
-        return min(query(v*2, tl, tm, l, min(r, tm)), 
+        return max(query(v*2, tl, tm, l, min(r, tm)), 
                    query(v*2+1, tm+1, tr, max(l, tm+1), r));
     }
 
@@ -77,11 +77,11 @@ int main() {
         cin >> u >> v >> n;
         u--; v--; // convert to 0-indexed
         
-        // Check if we have enough seats in the range [u, v-1]
-        int min_seats = st.query_range(u, v-1);
+        // Check the maximum number of seats already booked in the range [u, v-1]
+        int max_seats = st.query_range(u, v-1);
         
-        if (min_seats + n <= k) {
-            // Can fulfill the booking - after adding n seats, we won't exceed k
+        if (max_seats + n <= k) {
+            // Can fulfill the booking - after adding n seats, we won't exceed k on any segment
             cout << "T\n";
             // Update the segment tree - add n to the range [u, v-1]
             st.update_range(u, v-1, n);
