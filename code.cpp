@@ -80,8 +80,8 @@ int main() {
         // Check if we have enough seats in the range [u, v-1]
         int min_seats = st.query_range(u, v-1);
         
-        if (k - min_seats >= n) {
-            // Can fulfill the booking
+        if (min_seats + n <= k) {
+            // Can fulfill the booking - after adding n seats, we won't exceed k
             cout << "T\n";
             // Update the segment tree - add n to the range [u, v-1]
             st.update_range(u, v-1, n);
