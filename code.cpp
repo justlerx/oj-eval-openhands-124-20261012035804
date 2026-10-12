@@ -1,7 +1,6 @@
-#include <iostream>
+#include <cstdio>
 #include <vector>
 #include <algorithm>
-#include <climits>
 using namespace std;
 
 class SegmentTree {
@@ -63,22 +62,26 @@ public:
 };
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
     int x, k, p;
-    cin >> x >> k >> p;
+    scanf("%d %d %d", &x, &k, &p);
     
     // Create segment tree for x-1 segments (between x stations)
-    SegmentTree st(x-1);
+    // Handle edge case where x == 1 (no segments)
+    SegmentTree st(x > 1 ? x-1 : 1);
     
     for (int i = 0; i < p; i++) {
         int u, v, n;
-        cin >> u >> v >> n;
+        scanf("%d %d %d", &u, &v, &n);
         
         // If u >= v, the booking is invalid (can't book from a station to itself or backwards)
         if (u >= v) {
-            cout << "N\n";
+            printf("N\n");
+            continue;
+        }
+        
+        // If x == 1, no segments exist, so booking is invalid
+        if (x == 1) {
+            printf("N\n");
             continue;
         }
         
@@ -89,11 +92,11 @@ int main() {
         
         if (max_seats + n <= k) {
             // Can fulfill the booking - after adding n seats, we won't exceed k on any segment
-            cout << "T\n";
+            printf("T\n");
             // Update the segment tree - add n to the range [u, v-1]
             st.update_range(u, v-1, n);
         } else {
-            cout << "N\n";
+            printf("N\n");
         }
     }
     
