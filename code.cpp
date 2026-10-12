@@ -65,9 +65,12 @@ int main() {
     int x, k, p;
     scanf("%d %d %d", &x, &k, &p);
     
-    // Create segment tree for x-1 segments (between x stations)
-    // Handle edge case where x == 1 (no segments)
-    SegmentTree st(x > 1 ? x-1 : 1);
+    SegmentTree* st = nullptr;
+    
+    // Create segment tree only if we have more than 1 station
+    if (x > 1) {
+        st = new SegmentTree(x-1);
+    }
     
     for (int i = 0; i < p; i++) {
         int u, v, n;
@@ -85,16 +88,17 @@ int main() {
             continue;
         }
         
+        // At this point, we must have x > 1 and u < v
         u--; v--; // convert to 0-indexed
         
         // Check the maximum number of seats already booked in the range [u, v-1]
-        int max_seats = st.query_range(u, v-1);
+        int max_seats = st->query_range(u, v-1);
         
         if (max_seats + n <= k) {
             // Can fulfill the booking - after adding n seats, we won't exceed k on any segment
             printf("T\n");
             // Update the segment tree - add n to the range [u, v-1]
-            st.update_range(u, v-1, n);
+            st->update_range(u, v-1, n);
         } else {
             printf("N\n");
         }
