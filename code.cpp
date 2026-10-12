@@ -75,6 +75,13 @@ int main() {
     for (int i = 0; i < p; i++) {
         int u, v, n;
         cin >> u >> v >> n;
+        
+        // If u >= v, the booking is invalid (can't book from a station to itself or backwards)
+        if (u >= v) {
+            cout << "N\n";
+            continue;
+        }
+        
         u--; v--; // convert to 0-indexed
         
         // Check the maximum number of seats already booked in the range [u, v-1]
